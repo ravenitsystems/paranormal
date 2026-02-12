@@ -41,3 +41,14 @@ Overlay – gradient at the bottom fading into the layout background (#0d0a0f) s
 Border – thin amber bottom border to match the rest of the layout.
 Spacing – negative margin so the banner reaches the edges of the content area; your existing “HOME PAGE” content sits under the banner.
 The banner is served from /images/banner-castle.png. If you want a different size, crop, or overlay strength, say how you’d like it changed.
+
+Here’s what was changed:
+1. Full-bleed banner (Home.vue)
+.banner-wrap now uses:
+width: 100vw – as wide as the viewport
+max-width: 100vw – so it never exceeds that
+margin-left: calc(50% - 50vw) – shifts the block so its left edge lines up with the viewport’s left edge, making it span the full width even though it sits inside the max-width content area.
+So the banner runs edge-to-edge across the full width, while the .content block (and everything below the banner) stays inside the existing contained area with the same padding and max-width.
+2. Layout (Layout.vue)
+overflow-x-hidden was added on main so the full-bleed banner doesn’t create a horizontal scrollbar when the vertical scrollbar is visible (where 100vw can be slightly wider than the visible area).
+Result: the banner is full-width; the rest of the home content stays contained as before.
