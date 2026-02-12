@@ -27,3 +27,17 @@ fetchUser – function to refetch (e.g. after login/logout)
 Any component can depend on the same state by calling the composable, for example:
 <script setup>import { useAuth } from '../composables/useAuth';const { user, isLoggedIn, userLoading } = useAuth();</script><template>  <div v-if="userLoading">Checking auth…</div>  <div v-else-if="isLoggedIn">Hello, {{ user.name }}</div>  <div v-else>Please sign in.</div></template>
 So the result of the API call is available globally: any component that calls useAuth() can tell if a user is logged in via isLoggedIn or user, and all of them see the same data.
+
+
+Here’s what’s in place:
+1. Banner image
+File: public/images/banner-castle.png (PNG)
+Theme: Spooky gothic castle at night, dark sky, amber moon glow, aligned with your dark/amber palette.
+2. Home page
+Banner block at the top of Home.vue:
+Full-width image with object-fit: cover and max-height: 220px so it stays in proportion.
+Alt text: “Spooky castle at night”.
+Overlay – gradient at the bottom fading into the layout background (#0d0a0f) so the content below blends in.
+Border – thin amber bottom border to match the rest of the layout.
+Spacing – negative margin so the banner reaches the edges of the content area; your existing “HOME PAGE” content sits under the banner.
+The banner is served from /images/banner-castle.png. If you want a different size, crop, or overlay strength, say how you’d like it changed.
