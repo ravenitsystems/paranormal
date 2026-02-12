@@ -1,3 +1,16 @@
+Summary of changes:
+fetchUser() runs in onMounted
+The /api/user request is made when the Layout component mounts (on initial page load).
+toggleUserMenu() no longer fetches
+It only toggles the dropdown; the menu uses the user data that was loaded on mount.
+The dropdown still shows loading until the request finishes, then shows the correct state (signed in, guest, or error). The Retry button in the error state still calls fetchUser() so users can retry after a failed load.
+is the result of the api call available globally so other components can tell if a user is logged in
+
+Checking the project for an existing global state (e.g. Pinia):
+Keeping user state in Layout only. Adding a shared auth composable so any component can read login state and user data.
+
+
+
 Summary of what’s in place:
 1. Shared auth composable – resources/js/composables/useAuth.js
 Keeps one shared state for the app: userData, userLoading, userError are module-level refs, so every component that uses useAuth() sees the same data.
