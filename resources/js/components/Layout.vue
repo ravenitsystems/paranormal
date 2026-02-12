@@ -1,9 +1,14 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { useAuth } from '../composables/useAuth';
 
 const route = useRoute();
 const sidebarOpen = ref(false);
+const userMenuOpen = ref(false);
+const userMenuRef = ref(null);
+
+const { userData, userLoading, userError, fetchUser } = useAuth();
 
 function toggleSidebar() {
   sidebarOpen.value = !sidebarOpen.value;
@@ -13,16 +18,36 @@ function closeSidebar() {
   sidebarOpen.value = false;
 }
 
+function toggleUserMenu() {
+  userMenuOpen.value = !userMenuOpen.value;
+}
+
+function closeUserMenu() {
+  userMenuOpen.value = false;
+}
+
 function handleKeydown(e) {
-  if (e.key === 'Escape') closeSidebar();
+  if (e.key === 'Escape') {
+    closeSidebar();
+    closeUserMenu();
+  }
+}
+
+function handleClickOutside(e) {
+  if (userMenuRef.value && !userMenuRef.value.contains(e.target)) {
+    closeUserMenu();
+  }
 }
 
 onMounted(() => {
+  fetchUser();
   window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('click', handleClickOutside);
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener('click', handleClickOutside);
 });
 
 watch(sidebarOpen, (open) => {
@@ -78,7 +103,109 @@ watch(sidebarOpen, (open) => {
           </span>
         </span>
       </RouterLink>
-      <div class="h-10 w-10 md:hidden" aria-hidden="true" />
+      <div ref="userMenuRef" class="relative flex h-10 w-10 items-center justify-center">
+        <button
+          type="button"
+          aria-label="User menu"
+          :aria-expanded="userMenuOpen"
+          aria-haspopup="true"
+          class="flex h-10 w-10 items-center justify-center rounded-lg text-amber-500/90 transition hover:bg-amber-900/20 hover:text-amber-400"
+          :class="{ 'bg-amber-900/20 text-amber-400': userMenuOpen }"
+          @click.stop="toggleUserMenu"
+        >
+          <FontAwesomeIcon icon="user" class="h-5 w-5" />
+        </button>
+        <Transition
+          enter-active-class="transition duration-150 ease-out"
+          enter-from-class="opacity-0 scale-95"
+          enter-to-class="opacity-100 scale-100"
+          leave-active-class="transition duration-100 ease-in"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-95"
+        >
+          <div
+            v-show="userMenuOpen"
+            class="absolute right-0 top-full z-50 mt-2 w-48 origin-top-right rounded-lg border border-amber-900/30 bg-[#120f18] py-1 shadow-xl"
+            role="menu"
+          >
+            <!-- Loading -->
+            <div
+              v-if="userLoading"
+              class="flex items-center gap-2 px-3 py-4 text-sm text-stone-400"
+            >
+              <FontAwesomeIcon icon="spinner" class="h-4 w-4 animate-spin text-amber-500/80" />
+              Loading…
+            </div>
+
+            <!-- Error -->
+            <template v-else-if="userError">
+              <div class="border-b border-amber-900/20 px-3 py-2">
+                <p class="text-xs text-amber-600/90">Could not load user</p>
+                <p class="mt-0.5 text-xs text-stone-500">{{ userError }}</p>
+              </div>
+              <button
+                type="button"
+                class="flex w-full items-center gap-2 px-3 py-2 text-sm text-stone-400 transition hover:bg-amber-900/15 hover:text-amber-200/90"
+                @click="fetchUser"
+              >
+                <FontAwesomeIcon icon="arrows-rotate" class="h-4 w-4 text-amber-500/70" />
+                Retry
+              </button>
+            </template>
+
+            <!-- Signed in -->
+            <template v-else-if="userData?.user">
+              <div class="border-b border-amber-900/20 px-3 py-2">
+                <p class="truncate text-xs font-medium text-amber-400/90">Signed in as</p>
+                <p class="truncate text-sm text-stone-300">{{ userData.user.name || userData.user.email }}</p>
+              </div>
+              <a
+                href="#"
+                class="flex items-center gap-2 px-3 py-2 text-sm text-stone-400 transition hover:bg-amber-900/15 hover:text-amber-200/90"
+                role="menuitem"
+                @click.prevent="closeUserMenu"
+              >
+                <FontAwesomeIcon icon="cog" class="h-4 w-4 text-amber-500/70" />
+                Settings
+              </a>
+              <a
+                href="#"
+                class="flex items-center gap-2 px-3 py-2 text-sm text-stone-400 transition hover:bg-amber-900/15 hover:text-amber-200/90"
+                role="menuitem"
+                @click.prevent="closeUserMenu"
+              >
+                <FontAwesomeIcon icon="right-from-bracket" class="h-4 w-4 text-amber-500/70" />
+                Sign out
+              </a>
+            </template>
+
+            <!-- Guest -->
+            <template v-else>
+              <div class="border-b border-amber-900/20 px-3 py-2">
+                <p class="text-xs text-stone-500">Not signed in</p>
+              </div>
+              <a
+                href="#"
+                class="flex items-center gap-2 px-3 py-2 text-sm text-stone-400 transition hover:bg-amber-900/15 hover:text-amber-200/90"
+                role="menuitem"
+                @click.prevent="closeUserMenu"
+              >
+                <FontAwesomeIcon icon="right-to-bracket" class="h-4 w-4 text-amber-500/70" />
+                Sign in
+              </a>
+              <a
+                href="#"
+                class="flex items-center gap-2 px-3 py-2 text-sm text-stone-400 transition hover:bg-amber-900/15 hover:text-amber-200/90"
+                role="menuitem"
+                @click.prevent="closeUserMenu"
+              >
+                <FontAwesomeIcon icon="user-plus" class="h-4 w-4 text-amber-500/70" />
+                Register
+              </a>
+            </template>
+          </div>
+        </Transition>
+      </div>
     </header>
 
     <!-- Mobile overlay -->
@@ -128,7 +255,7 @@ watch(sidebarOpen, (open) => {
     </aside>
 
     <!-- Main content -->
-    <main class="relative min-h-[calc(100vh-3.5rem)] md:min-h-[calc(100vh-3.5rem)]">
+    <main class="relative min-h-[calc(100vh-3.5rem)] overflow-x-hidden md:min-h-[calc(100vh-3.5rem)]">
       <div class="mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-8">
         <slot />
       </div>

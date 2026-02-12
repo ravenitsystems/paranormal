@@ -13,9 +13,16 @@ import {
     faBars,
     faTimes,
     faGhost,
+    faUser,
+    faCog,
+    faRightFromBracket,
+    faSpinner,
+    faRightToBracket,
+    faUserPlus,
+    faArrowsRotate,
 } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faHome, faSearch, faBars, faTimes, faGhost);
+library.add(faHome, faSearch, faBars, faTimes, faGhost, faUser, faCog, faRightFromBracket, faSpinner, faRightToBracket, faUserPlus, faArrowsRotate);
 
 const app = createApp(App);
 app.component("FontAwesomeIcon", FontAwesomeIcon);
